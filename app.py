@@ -16,30 +16,30 @@ st.set_page_config(page_title="Recruitment & Placement System", page_icon="💼"
 st.title("💼 Recruitment & Placement Management System")
 st.write("Welcome to the campus placement and recruitment portal. Manage users, job postings, and applications seamlessly.")
 
-# Sidebar navigation
+# Sidebar navigation (Labels 1 to 5 updated)
 menu = st.sidebar.selectbox("Navigation", [
-    "View Open Jobs", 
+    "Browse Available Jobs", 
     "Apply for a Job", 
-    "My Applications", 
+    "Track My Applications", 
     "Recruiter Dashboard",
-    "Analytics & Reports",
-    "Post a Job (Recruiters)", 
-    "Register User", 
+    "Placement Insights & Stats",
+    "Publish Job Opening", 
+    "Create New Account", 
     "Admin: View Users"
 ])
 
-# ==================== VIEW OPEN JOBS ====================
-if menu == "View Open Jobs":
+# ==================== BROWSE AVAILABLE JOBS ====================
+if menu == "Browse Available Jobs":
     st.header("📋 Current Open Job Listings")
     jobs = get_open_jobs()
     
     if not jobs:
         st.info("No open job listings available right now.")
     else:
-        # Search & Filter controls
+        # Search & Filter controls (Label 8 updated)
         col1, col2 = st.columns(2)
         with col1:
-            search_query = st.text_input("🔍 Search by Job Title", "").lower()
+            search_query = st.text_input("🔍 Search Role or Keyword", "").lower()
         with col2:
             locations = ["All"] + list(set(job['location'] for job in jobs))
             selected_location = st.selectbox("📍 Filter by Location", locations)
@@ -85,14 +85,18 @@ elif menu == "Apply for a Job":
         selected_job_label = st.selectbox("Select Job", list(job_options.keys()))
         selected_candidate_label = st.selectbox("Select Candidate", list(candidate_options.keys()))
         
-        if st.button("Submit Application"):
+        # Label 9 updated + Duplicate Application Handling
+        if st.button("Confirm & Submit Application"):
             job_id = job_options[selected_job_label]
             user_id = candidate_options[selected_candidate_label]
-            apply_for_job(job_id, user_id)
-            st.success("Application submitted successfully!")
+            success, msg = apply_for_job(job_id, user_id)
+            if success:
+                st.success(msg)
+            else:
+                st.warning(msg)
 
-# ==================== MY APPLICATIONS ====================
-elif menu == "My Applications":
+# ==================== TRACK MY APPLICATIONS ====================
+elif menu == "Track My Applications":
     st.header("📄 My Job Applications")
     
     users = get_all_users()
@@ -138,7 +142,8 @@ elif menu == "Recruiter Dashboard":
                         ["applied", "shortlisted", "rejected", "hired"],
                         index=["applied", "shortlisted", "rejected", "hired"].index(app['status'])
                     )
-                    update_button = st.form_submit_button("Save Status")
+                    # Label 10 updated
+                    update_button = st.form_submit_button("Save Candidate Decision")
                     
                     if update_button:
                         update_application_status(app['application_id'], new_status)
@@ -146,8 +151,8 @@ elif menu == "Recruiter Dashboard":
                         st.rerun()
                 st.divider()
 
-# ==================== ANALYTICS & REPORTS ====================
-elif menu == "Analytics & Reports":
+# ==================== PLACEMENT INSIGHTS & STATS ====================
+elif menu == "Placement Insights & Stats":
     st.header("📊 Placement Analytics & System Metrics")
     
     users = get_all_users()
@@ -189,8 +194,8 @@ elif menu == "Analytics & Reports":
         st.subheader("📋 Recent Applications Overview")
         st.dataframe(applications, use_container_width=True)
 
-# ==================== POST A JOB ====================
-elif menu == "Post a Job (Recruiters)":
+# ==================== PUBLISH JOB OPENING ====================
+elif menu == "Publish Job Opening":
     st.header("🏢 Post a New Job / Add Company")
     
     with st.form("job_form"):
@@ -215,13 +220,14 @@ elif menu == "Post a Job (Recruiters)":
             else:
                 st.error("Please provide a valid Company ID and Job Title.")
 
-# ==================== REGISTER USER ====================
-elif menu == "Register User":
+# ==================== CREATE NEW ACCOUNT ====================
+elif menu == "Create New Account":
     st.header("👤 User Registration")
     
+    # Labels 6 & 7 updated
     with st.form("reg_form"):
-        username = st.text_input("Username")
-        email = st.text_input("Email")
+        username = st.text_input("Full Name / Username")
+        email = st.text_input("Official Email Address")
         password = st.text_input("Password", type="password")
         role = st.selectbox("Role", ["candidate", "recruiter", "admin"])
         
