@@ -88,16 +88,23 @@ def get_open_jobs():
 
 def apply_for_job(job_id, user_id):
     conn = get_db_connection()
-    if conn is None:
-        return
+    if not conn:
+        return False, "Database connection failed."
     cursor = conn.cursor()
-    query = "INSERT INTO applications (job_id, user_id) VALUES (%s, %s)"
     try:
-        cursor.execute(query, (job_id, user_id))
+        # Check for duplicate application
+        check_query = "SELECT application_id FROM applications WHERE job_id = %s AND user_id = %s"
+        cursor.execute(check_query, (job_id, user_id))
+        if cursor.fetchone():
+            return False, "You have already applied for this job!"
+
+        # Insert new application if no duplicate exists
+        insert_query = "INSERT INTO applications (job_id, user_id, status) VALUES (%s, %s, 'applied')"
+        cursor.execute(insert_query, (job_id, user_id))
         conn.commit()
-        print(f"Application submitted successfully for Job ID {job_id}!")
+        return True, "Application submitted successfully!"
     except mysql.connector.Error as err:
-        print(f"Error applying for job: {err}")
+        return False, f"Database error: {err}"
     finally:
         cursor.close()
         conn.close()
